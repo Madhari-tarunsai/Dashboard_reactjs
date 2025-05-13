@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import "./index.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      data: [],
+      loading: true,
+    };
+  }
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  handlerClick = (adc) => {
+    this.setState({ loading: true }); 
+    let url;
+    if (adc === "fakedata") {
+      url = "https://fakestoreapi.com/products";
+    } else if (adc === "Dummydata") {
+      url = "https://dummyjson.com/products";
+    } else if (adc === "Recepicesdata") {
+      url = "https://dummyjson.com/recipes";
+    } else {
+      return;
+    }
+    fetch(url)
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res);
+        const finalres = res.products || res.recipes || res;
+        this.setState({ data: finalres, loading: false });
+      });
+  };
+
+  render() {
+    return (
+      <div id="main_1">
+        <div id="main_2">
+          <button onClick={() => this.handlerClick("fakedata")}>Fakedata</button>
+          <button onClick={() => this.handlerClick("Dummydata")}>Dummydata</button>
+          <button onClick={() => this.handlerClick("Recepicesdata")}>Recepicesdata</button>
+        </div>
+
+        <div id="main_3">
+          {this.state.loading ? (
+            <p>Please select a button</p>
+          ) : (
+            <div className="card-container">
+              {this.state.data.map((p, i) => (
+                <div className="card" key={i}>
+                  <h3>{p.title || p.name}</h3>
+                  {p.image || p.images ? (
+                    <img
+                      src={p.image || p.images?.[0]}
+                      alt={p.title || p.name}
+                      className="card-img"
+                    />
+                  ) : null}
+                  <p>{p.description || p.instructions?.[0]}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
 }
 
-export default App
+export default App;
