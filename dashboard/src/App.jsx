@@ -10,8 +10,16 @@ class App extends React.Component {
     };
   }
 
+  componentDidMount() {
+    // Load from localStorage if available
+    const savedData = localStorage.getItem("data");
+    if (savedData) {
+      this.setState({ data: JSON.parse(savedData), loading: false });
+    }
+  }
+
   handlerClick = (adc) => {
-    this.setState({ loading: true }); 
+    this.setState({ loading: true });
     let url;
     if (adc === "fakedata") {
       url = "https://fakestoreapi.com/products";
@@ -22,12 +30,17 @@ class App extends React.Component {
     } else {
       return;
     }
+
     fetch(url)
       .then((res) => res.json())
       .then((res) => {
-        console.log(res);
         const finalres = res.products || res.recipes || res;
         this.setState({ data: finalres, loading: false });
+        localStorage.setItem("data", JSON.stringify(finalres));
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        this.setState({ loading: false });
       });
   };
 
@@ -48,13 +61,13 @@ class App extends React.Component {
               {this.state.data.map((p, i) => (
                 <div className="card" key={i}>
                   <h3>{p.title || p.name}</h3>
-                  {p.image || p.images ? (
+                  {(p.image || p.images) && (
                     <img
                       src={p.image || p.images?.[0]}
                       alt={p.title || p.name}
                       className="card-img"
                     />
-                  ) : null}
+                  )}
                   <p>{p.description || p.instructions?.[0]}</p>
                 </div>
               ))}
